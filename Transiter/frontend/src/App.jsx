@@ -29,7 +29,7 @@ function Chat() {
 
   return (
     <div className="card">
-      <h2>User Dashboard</h2>
+      <h2 style="margin-bottom: 30px;">User Dashboard</h2>
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -164,7 +164,8 @@ export default function App() {
       <div className="wave wave3"></div>
 
       <div className="container">
-        <h1 style={{ marginTop: "60px" }}>Transiter</h1>
+         <h1 style={{ marginTop: "60px", marginBottom: "30px" }}>Transiter (Travel Made Easy)</h1>
+
 
         <Chat />
 
