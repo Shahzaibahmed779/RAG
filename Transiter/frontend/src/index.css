@@ -1,0 +1,162 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: linear-gradient(to bottom, #0f172a, #1e293b);
+  color: white;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1; /* keep UI above waves */
+}
+
+/* Glass card with reflection */
+.card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px) saturate(180%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 60%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+
+h1,
+h2 {
+  color: #38bdf8;
+  margin-top: 0;
+}
+
+input,
+select,
+textarea,
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+input,
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 100%;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #bbb;
+}
+
+button {
+  background: #38bdf8;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 1rem;
+}
+
+button:hover {
+  background: #0ea5e9;
+}
+
+.wave {
+  position: fixed;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at center,
+    rgba(56, 189, 248, 0.35) 0%,
+    transparent 60%
+  );
+  border-radius: 40%;
+  animation: rotateWaves 25s linear infinite;
+  z-index: 0;
+}
+
+.wave.wave2 {
+  animation: rotateWavesReverse 70s linear infinite;
+  opacity: 0.35;
+}
+
+.wave.wave3 {
+  animation: rotateWaves 100s linear infinite;
+  opacity: 0.2;
+  background: radial-gradient(
+    circle at center,
+    rgba(56, 189, 248, 0.15) 0%,
+    transparent 70%
+  );
+}
+
+.wave.wave4 {
+  animation: rotateWavesReverse 130s linear infinite;
+  opacity: 0.3;
+}
+
+@keyframes rotateWaves {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes rotateWavesReverse {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
