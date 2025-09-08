@@ -29,7 +29,7 @@ function Chat() {
 
   return (
     <div className="card">
-      <h2 style="margin-bottom: 30px;">User Dashboard</h2>
+      <h2 style={{ marginBottom: "30px" }}>User Dashboard</h2>
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
