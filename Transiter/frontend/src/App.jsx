@@ -29,6 +29,7 @@ function Chat() {
 
   return (
     <div className="card">
+      <h2>User Dashboard</h2>
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -169,13 +170,13 @@ export default function App() {
 
         {!isAdmin ? (
           <div className="card">
-            <h2>Admin Login</h2>
+            <h2>Want to expand our knowledge base?</h2>
             <input
               value={adminToken}
               onChange={(e) => setAdminToken(e.target.value)}
-              placeholder="Enter admin token"
+              placeholder="For authorization, enter the admin token."
             />
-            <button onClick={tryLogin}>Login</button>
+            <button onClick={tryLogin}>Enter</button>
           </div>
         ) : (
           <Admin token={adminToken} />
