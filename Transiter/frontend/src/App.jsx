@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import logo from "./assets/logo.png";
 
@@ -6,18 +6,32 @@ const API = import.meta.env.VITE_API_URL;
 
 const CITIES = ["Tokyo", "Osaka", "Kyoto"];
 const ITEM_HEIGHT = 44;
-const VISIBLE_COUNT = 3;
 
 function CityWheel({ value, onChange }) {
-  const [scrollTop, setScrollTop] = useState(0);
+  const containerRef = useRef(null);
+  const [active, setActive] = useState(0);
+
   const selectedIndex = useMemo(
     () => Math.max(0, CITIES.indexOf(value)),
     [value]
   );
 
+  // Keep the selected item centered when value changes
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const idx = Math.max(0, CITIES.indexOf(value));
+    const centerOffset = el.clientHeight / 2 - ITEM_HEIGHT / 2;
+    const target = Math.max(0, idx * ITEM_HEIGHT - centerOffset);
+    el.scrollTo({ top: target, behavior: "smooth" });
+    setActive(idx);
+  }, [value]);
+
   const onScroll = (e) => {
-    const t = e.currentTarget.scrollTop;
-    setScrollTop(t);
+    const el = e.currentTarget;
+    const centerOffset = el.clientHeight / 2 - ITEM_HEIGHT / 2;
+    const idx = Math.round((el.scrollTop + centerOffset) / ITEM_HEIGHT);
+    setActive(idx);
   };
 
   const onWheelClick = (index) => {
@@ -25,17 +39,13 @@ function CityWheel({ value, onChange }) {
     if (city) onChange(city);
   };
 
-  // Compute aria-selected based on scroll position
-  const active = Math.round(scrollTop / ITEM_HEIGHT);
-
   return (
     <div
+      ref={containerRef}
       className="city-wheel"
       onScroll={onScroll}
-      style={{
-        paddingTop: (VISIBLE_COUNT - 1) / 2 * ITEM_HEIGHT,
-        paddingBottom: (VISIBLE_COUNT - 1) / 2 * ITEM_HEIGHT,
-      }}
+      role="listbox"
+      aria-label="Select city"
     >
       {CITIES.map((c, i) => (
         <div
@@ -78,7 +88,7 @@ function Chat() {
   };
 
   return (
-    <div className="card" id="ask">
+    <div className="card reveal" id="ask">
       <h2>Ask Transiter</h2>
       <p className="section-sub">
         Get accurate answers about tickets, passes, and routes.
@@ -92,6 +102,19 @@ function Chat() {
       />
 
       <label className="field-label">City</label>
+      <div className="city-pills" aria-label="Quick city selection">
+        {CITIES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            className={`pill ${city === c ? "active" : ""}`}
+            onClick={() => setCity(c)}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+      <div className="field-hint">Tip: Tap a city above or scroll the wheel below.</div>
       <CityWheel value={city} onChange={setCity} />
 
       <div style={{ display: "flex", gap: 10 }}>
@@ -149,13 +172,26 @@ function Admin({ token }) {
   };
 
   return (
-    <div className="card" id="admin">
-      <h2>Knowledge Ingestion</h2>
+    <div className="card reveal" id="admin">
+      <h2>Administrator Access</h2>
       <p className="section-sub">
-        Add trusted URLs to improve Transiter’s city-specific guidance.
+        Enter your token to add official sources and keep results fresh.
       </p>
 
       <label className="field-label">City</label>
+      <div className="city-pills" aria-label="Quick city selection">
+        {CITIES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            className={`pill ${city === c ? "active" : ""}`}
+            onClick={() => setCity(c)}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+      <div className="field-hint">Tip: Tap a city above or scroll the wheel below.</div>
       <CityWheel value={city} onChange={setCity} />
 
       <label className="field-label">URLs (space separated)</label>
@@ -206,9 +242,26 @@ export default function App() {
     }
   };
 
-  // Simple active nav highlighting based on hash
-  const [hash, setHash] = useState(window.location.hash);
-  window.onhashchange = () => setHash(window.location.hash);
+  // Reveal-on-scroll effect for sections
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll(".reveal"));
+    if (!("IntersectionObserver" in window) || els.length === 0) {
+      els.forEach((el) => el.classList.add("is-visible"));
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
 
   return (
     <>
@@ -218,28 +271,17 @@ export default function App() {
             <img src={logo} alt="Transiter logo" />
             <div className="brand-name">Transiter</div>
           </div>
-          <nav className="app-nav" aria-label="Primary">
-            <a href="#ask" className={`nav-link ${hash === "#ask" ? "active" : ""}`}>Ask</a>
-            <a href="#admin" className={`nav-link ${hash === "#admin" ? "active" : ""}`}>Admin</a>
-          </nav>
-          <div className="header-sub">Travel made easy</div>
         </div>
       </header>
 
-      {/* soft animated brand waves */}
-      <div className="bg-waves" aria-hidden="true">
-        <div className="wave w1"></div>
-        <div className="wave w2"></div>
-        <div className="wave w3"></div>
-      </div>
+      {/* original-style rotating wave layers */}
+      <div className="wave"></div>
+      <div className="wave wave2"></div>
+      <div className="wave wave3"></div>
 
       {/* hero */}
       <section className="hero">
         <h1 className="hero-title">Transit answers, simplified.</h1>
-        <p className="hero-lead">
-          Smart, city‑aware guidance for tickets, passes, and routes—built to be fast,
-          accurate, and easy on the eyes.
-        </p>
         <div className="cta-group">
           <a href="#ask" className="btn">Ask a question</a>
           <a href="#admin" className="btn btn-secondary">Admin sign in</a>
@@ -248,7 +290,7 @@ export default function App() {
 
       <div className="container">
         {/* value props */}
-        <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12 }}>
+        <div className="card reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12 }}>
           <div>
             <h2 style={{ marginBottom: 6 }}>Reliable</h2>
             <p className="section-sub" style={{ margin: 0 }}>
@@ -272,7 +314,7 @@ export default function App() {
         <Chat />
 
         {!isAdmin ? (
-          <div className="card" id="admin">
+          <div className="card reveal" id="admin">
             <h2>Administrator Access</h2>
             <p className="section-sub">
               Enter your token to add official sources and keep results fresh.
