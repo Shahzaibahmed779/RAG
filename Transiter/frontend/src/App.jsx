@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import logo from "./assets/logo.png";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -29,9 +30,9 @@ function Chat() {
 
   return (
     <div className="card">
-      <h2 style={{ marginBottom: "14px" }}>Ask Transiter</h2>
-      <p style={{ marginTop: 0, marginBottom: "14px", opacity: 0.9 }}>
-        Get fast, friendly answers about tickets, passes, routes and more.
+      <h2>Ask Transiter</h2>
+      <p className="section-sub">
+        Get accurate answers about tickets, passes, and routes.
       </p>
 
       <label className="field-label">Your question</label>
@@ -51,9 +52,20 @@ function Chat() {
         <option value="Kyoto">Kyoto</option>
       </select>
 
-      <button onClick={ask} disabled={loading || !query.trim()}>
-        {loading ? "Thinking…" : "Get Answer"}
-      </button>
+      <div style={{ display: "flex", gap: 10 }}>
+        <button onClick={ask} disabled={loading || !query.trim()}>
+          {loading ? "Thinking…" : "Get Answer"}
+        </button>
+        <button
+          className="btn-secondary"
+          onClick={() => {
+            setQuery("");
+            setAnswer("");
+          }}
+        >
+          Clear
+        </button>
+      </div>
 
       <div style={{ marginTop: 16, whiteSpace: "pre-wrap", maxHeight: "320px", overflowY: "auto" }} className="markdown">
         <ReactMarkdown>{answer}</ReactMarkdown>
@@ -95,7 +107,7 @@ function Admin({ token }) {
   return (
     <div className="card">
       <h2>Knowledge Ingestion</h2>
-      <p style={{ marginTop: 0, marginBottom: "12px", opacity: 0.9 }}>
+      <p className="section-sub">
         Add trusted URLs to improve Transiter’s city-specific guidance.
       </p>
 
@@ -124,7 +136,20 @@ function Admin({ token }) {
         placeholder="fares, passes, routes"
       />
 
-      <button onClick={ingest}>Ingest</button>
+      <div style={{ display: "flex", gap: 10 }}>
+        <button onClick={ingest}>Ingest</button>
+        <button
+          className="btn-secondary"
+          onClick={() => {
+            setUrls("");
+            setTags("");
+            setResult("");
+          }}
+        >
+          Reset
+        </button>
+      </div>
+
       <pre style={{ marginTop: 12, fontSize: "0.9em", whiteSpace: "pre-wrap" }}>
         {result}
       </pre>
@@ -146,23 +171,30 @@ export default function App() {
 
   return (
     <>
-      {/* brand background accents */}
-      <div className="wave"></div>
-      <div className="wave wave2"></div>
-      <div className="wave wave3"></div>
+      <header className="app-header">
+        <div className="app-header-inner">
+          <div className="brand">
+            <img src={logo} alt="Transiter logo" />
+            <div className="brand-name">Transiter</div>
+          </div>
+          <div className="header-sub">Travel made easy</div>
+        </div>
+      </header>
 
       <div className="container">
-        <h1 style={{ marginTop: "46px", marginBottom: "6px" }}>Transiter</h1>
-        <p style={{ textAlign: "center", marginTop: 0, marginBottom: "26px", opacity: 0.9 }}>
-          Travel made easy with clear, local transit guidance.
-        </p>
+        <div className="card">
+          <h1>Welcome</h1>
+          <p className="section-sub">
+            Clear, local transit guidance for busy professionals and everyday riders.
+          </p>
+        </div>
 
         <Chat />
 
         {!isAdmin ? (
           <div className="card">
             <h2>Administrator Access</h2>
-            <p style={{ marginTop: 0, marginBottom: "12px", opacity: 0.9 }}>
+            <p className="section-sub">
               Enter your token to add official sources and keep results fresh.
             </p>
             <label className="field-label">Admin token</label>
@@ -171,11 +203,23 @@ export default function App() {
               onChange={(e) => setAdminToken(e.target.value)}
               placeholder="Enter admin token"
             />
-            <button onClick={tryLogin}>Sign in</button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={tryLogin}>Sign in</button>
+              <button
+                className="btn-secondary"
+                onClick={() => setAdminToken("")}
+              >
+                Clear
+              </button>
+            </div>
           </div>
         ) : (
           <Admin token={adminToken} />
         )}
+
+        <footer className="footer">
+          © {new Date().getFullYear()} Transiter. All rights reserved.
+        </footer>
       </div>
     </>
   );
