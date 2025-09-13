@@ -233,6 +233,7 @@ export default function App() {
     let touchStartTarget = null;
 
     const onWheel = (e) => {
+      const THRESH = 25;
       if (isAnimatingRef.current) {
         e.preventDefault();
         return;
@@ -240,10 +241,15 @@ export default function App() {
       if (canScrollInDirection(e.target, e.deltaY)) {
         return; // allow native scroll inside scrollable areas
       }
-      e.preventDefault();
-      if (e.deltaY > 25 && panel < 1) {
+      // Allow the page to scroll naturally at the edges of the stage
+      if ((panel === 0 && e.deltaY < -THRESH) || (panel === 1 && e.deltaY > THRESH)) {
+        return;
+      }
+      if (e.deltaY > THRESH && panel < 1) {
+        e.preventDefault();
         goTo(1);
-      } else if (e.deltaY < -25 && panel > 0) {
+      } else if (e.deltaY < -THRESH && panel > 0) {
+        e.preventDefault();
         goTo(0);
       }
     };
@@ -284,6 +290,43 @@ export default function App() {
     };
   }, [panel]);
 
+  // Keyboard navigation between panels
+  useEffect(() => {
+    const isTypingTarget = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const tag = el.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable;
+    };
+
+    const onKeyDown = (e) => {
+      if (isTypingTarget(e.target)) return;
+      const k = e.key;
+      const forward =
+        k === "PageDown" ||
+        k === "ArrowDown" ||
+        k === "ArrowRight" ||
+        (k === " " && !e.shiftKey) ||
+        k === "End";
+      const backward =
+        k === "PageUp" ||
+        k === "ArrowUp" ||
+        k === "ArrowLeft" ||
+        (k === " " && e.shiftKey) ||
+        k === "Home";
+
+      if (forward && pane <l 1) {
+        e.preventDefault();
+        goTo(1);
+      } else if (backward && panel > 0) {
+        e.preventDefault();
+        goTo(0);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown, { passive: false });
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [panel]);
+
   // Reveal-on-scroll effect for non-stage sections
   useEffect(() => {
     const els = Array.from(document.querySelectorAll(".reveal"));
@@ -302,8 +345,7 @@ export default function App() {
       { threshold: 0.1 }
     );
     els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+
 
   const handleCTA = (target) => (e) => {
     e.preventDefault();

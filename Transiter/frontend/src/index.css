@@ -27,8 +27,7 @@ body,
 
 /* Header */
 .app-header {
-  position: sticky;
-  top: 0;
+  position: static;
   z-index: 10;
   background: rgba(0, 49, 53, 0.96);
   border-bottom: 1px solid rgba(175, 221, 229, 0.22);
@@ -74,24 +73,24 @@ body,
   left: -70vmax;
   width: 240vmax;
   height: 240vmax;
-  background: radial-gradient(ellipse at 35% 50%, rgba(15, 164, 175, 0.22) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 35% 50%, rgba(15, 164, 175, 0.30) 0%, transparent 60%);
   border-radius: 50%;
   animation: waveOrbitA 80s linear infinite;
   z-index: 0;
-  opacity: 0.22;
-  filter: blur(5px);
+  opacity: 0.30;
+  filter: blur(3px);
 }
 
 .wave.wave2 {
   animation: waveOrbitB 120s linear infinite;
-  opacity: 0.18;
-  background: radial-gradient(ellipse at 70% 55%, rgba(175, 221, 229, 0.18) 0%, transparent 65%);
+  opacity: 0.26;
+  background: radial-gradient(ellipse at 70% 55%, rgba(175, 221, 229, 0.26) 0%, transparent 65%);
 }
 
 .wave.wave3 {
   animation: waveOrbitC 160s linear infinite;
-  opacity: 0.14;
-  background: radial-gradient(ellipse at 50% 25%, rgba(15, 164, 175, 0.16) 0%, transparent 70%);
+  opacity: 0.22;
+  background: radial-gradient(ellipse at 50% 25%, rgba(15, 164, 175, 0.22) 0%, transparent 70%);
 }
 
 @keyframes waveOrbitA {
@@ -116,7 +115,7 @@ body,
   height: 100vh;
   overflow: hidden;
   z-index: 1;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
 }
 
 .stage {
