@@ -345,7 +345,8 @@ export default function App() {
       { threshold: 0.1 }
     );
     els.forEach((el) => obs.observe(el));
-
+    return () => obs.disconnect();
+  }, []);
 
   const handleCTA = (target) => (e) => {
     e.preventDefault();
