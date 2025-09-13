@@ -1,30 +1,38 @@
+:root {
+  --bg: #003135;
+  --primary: #0FA4AF;
+  --accent: #AFDDE5;
+  --text: #AFDDE5;
+}
+
 html,
 body,
 #root {
   height: 100%;
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: linear-gradient(to bottom, #0f172a, #1e293b);
-  color: white;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: linear-gradient(160deg, var(--bg) 0%, var(--primary) 100%);
+  color: var(--text);
   overflow-x: hidden;
 }
 
 .container {
-  max-width: 800px;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px;
   position: relative;
   z-index: 1; /* keep UI above waves */
 }
 
-/* Glass card with reflection */
+/* Glass card with subtle border */
 .card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px) saturate(180%);
+  background: rgba(175, 221, 229, 0.08); /* accent tint */
+  backdrop-filter: blur(16px) saturate(160%);
   border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 22px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(175, 221, 229, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 49, 53, 0.35); /* bg color shadow */
   position: relative;
   overflow: hidden;
 }
@@ -32,24 +40,38 @@ body,
 .card::before {
   content: "";
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
+  top: -60%;
+  left: -40%;
+  width: 180%;
   height: 200%;
   background: linear-gradient(
     120deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    transparent 60%
+    rgba(175, 221, 229, 0.18) 0%,
+    transparent 55%
   );
-  transform: rotate(25deg);
+  transform: rotate(18deg);
   pointer-events: none;
 }
 
-h1,
-h2 {
-  color: #38bdf8;
-  margin-top: 0;
+h1 {
+  color: var(--accent);
+  margin: 0 0 8px 0;
   text-align: center;
+  letter-spacing: 0.5px;
+}
+
+h2 {
+  color: var(--primary);
+  margin: 0 0 12px 0;
+  text-align: left;
+}
+
+.field-label {
+  display: block;
+  margin: 10px 0 6px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 input,
@@ -57,47 +79,69 @@ select,
 textarea,
 button {
   border: none;
-  border-radius: 8px;
-  padding: 10px;
+  border-radius: 10px;
+  padding: 12px;
   font-size: 14px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 * {
   box-sizing: border-box;
 }
+
 input,
 select,
 textarea {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: rgba(175, 221, 229, 0.12);
+  color: var(--text);
   width: 100%;
+  outline: none;
+  border: 1px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  background: rgba(175, 221, 229, 0.18);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #bbb;
+  color: rgba(175, 221, 229, 0.8);
 }
 
 button {
-  background: #38bdf8;
-  color: white;
+  background: var(--primary);
+  color: #003135;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 1rem;
+  transition: transform 0.06s ease, background 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 0.5rem;
+  box-shadow: 0 6px 16px rgba(15, 164, 175, 0.35);
 }
 
 button:hover {
-  background: #0ea5e9;
+  background: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(175, 221, 229, 0.35);
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* subtle brand waves */
 .wave {
   position: fixed;
   width: 200%;
   height: 200%;
   background: radial-gradient(
     circle at center,
-    rgba(56, 189, 248, 0.35) 0%,
+    rgba(15, 164, 175, 0.3) 0%,
     transparent 60%
   );
   border-radius: 40%;
@@ -108,21 +152,21 @@ button:hover {
 .wave.wave2 {
   animation: rotateWavesReverse 70s linear infinite;
   opacity: 0.35;
+  background: radial-gradient(
+    circle at center,
+    rgba(175, 221, 229, 0.25) 0%,
+    transparent 65%
+  );
 }
 
 .wave.wave3 {
   animation: rotateWaves 100s linear infinite;
-  opacity: 0.2;
+  opacity: 0.25;
   background: radial-gradient(
     circle at center,
-    rgba(56, 189, 248, 0.15) 0%,
+    rgba(15, 164, 175, 0.18) 0%,
     transparent 70%
   );
-}
-
-.wave.wave4 {
-  animation: rotateWavesReverse 130s linear infinite;
-  opacity: 0.3;
 }
 
 @keyframes rotateWaves {
@@ -143,10 +187,15 @@ button:hover {
   }
 }
 
+/* markdown area */
+.markdown {
+  color: var(--accent);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .container {
-    padding: 12px;
+    padding: 16px;
   }
 
   .card {
@@ -157,7 +206,7 @@ button:hover {
   input,
   select,
   textarea {
-    font-size: 12px;
-    padding: 8px;
+    font-size: 13px;
+    padding: 10px;
   }
 }

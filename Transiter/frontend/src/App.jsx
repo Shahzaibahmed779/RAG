@@ -29,35 +29,22 @@ function Chat() {
 
   return (
     <div className="card">
-      <h2 style={{ marginBottom: "30px" }}>User Dashboard</h2>
+      <h2 style={{ marginBottom: "14px" }}>Ask Transiter</h2>
+      <p style={{ marginTop: 0, marginBottom: "14px", opacity: 0.9 }}>
+        Get fast, friendly answers about tickets, passes, routes and more.
+      </p>
+
+      <label className="field-label">Your question</label>
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Ask anything about your transit (e.g. passes, tickets, routes)..."
+        placeholder="E.g. What is the cheapest way to get from Shinjuku to Narita?"
       />
 
-      <label
-        style={{
-          display: "block",
-          marginBottom: "6px",
-          color: "#38bdf8",
-          fontWeight: "bold",
-        }}
-      >
-        Select City
-      </label>
+      <label className="field-label">City</label>
       <select
         value={city}
         onChange={(e) => setCity(e.target.value)}
-        style={{
-          background: "#1e293b",
-          color: "white",
-          borderRadius: "8px",
-          padding: "10px",
-          width: "100%",
-          marginBottom: "10px",
-          border: "1px solid #38bdf8",
-        }}
       >
         <option value="Tokyo">Tokyo</option>
         <option value="Osaka">Osaka</option>
@@ -65,10 +52,10 @@ function Chat() {
       </select>
 
       <button onClick={ask} disabled={loading || !query.trim()}>
-        {loading ? "Thinking…" : "Submit"}
+        {loading ? "Thinking…" : "Get Answer"}
       </button>
 
-      <div style={{ marginTop: 16, whiteSpace: "pre-wrap", maxHeight: "300px", overflowY: "auto" }}>
+      <div style={{ marginTop: 16, whiteSpace: "pre-wrap", maxHeight: "320px", overflowY: "auto" }} className="markdown">
         <ReactMarkdown>{answer}</ReactMarkdown>
       </div>
     </div>
@@ -107,37 +94,38 @@ function Admin({ token }) {
 
   return (
     <div className="card">
-      <h2>Admin: Ingest URLs</h2>
+      <h2>Knowledge Ingestion</h2>
+      <p style={{ marginTop: 0, marginBottom: "12px", opacity: 0.9 }}>
+        Add trusted URLs to improve Transiter’s city-specific guidance.
+      </p>
+
+      <label className="field-label">City</label>
       <select
         value={city}
         onChange={(e) => setCity(e.target.value)}
-        style={{
-          background: "#1e293b",
-          color: "white",
-          borderRadius: "8px",
-          padding: "10px",
-          width: "100%",
-          marginBottom: "10px",
-          border: "1px solid #38bdf8",
-        }}
       >
         <option value="Tokyo">Tokyo</option>
         <option value="Osaka">Osaka</option>
         <option value="Kyoto">Kyoto</option>
       </select>
+
+      <label className="field-label">URLs (space separated)</label>
       <textarea
         rows={3}
         value={urls}
         onChange={(e) => setUrls(e.target.value)}
-        placeholder="Enter URLs separated by spaces"
+        placeholder="https://www.metro.tokyo.jp/ ... https://www.jreast.co.jp/ ..."
       />
+
+      <label className="field-label">Tags (comma separated)</label>
       <input
         value={tags}
         onChange={(e) => setTags(e.target.value)}
-        placeholder="Enter tags, comma separated"
+        placeholder="fares, passes, routes"
       />
+
       <button onClick={ingest}>Ingest</button>
-      <pre style={{ marginTop: 12, fontSize: "0.85em", whiteSpace: "pre-wrap" }}>
+      <pre style={{ marginTop: 12, fontSize: "0.9em", whiteSpace: "pre-wrap" }}>
         {result}
       </pre>
     </div>
@@ -158,26 +146,32 @@ export default function App() {
 
   return (
     <>
-      {/* 🌊 rotating wave layers */}
+      {/* brand background accents */}
       <div className="wave"></div>
       <div className="wave wave2"></div>
       <div className="wave wave3"></div>
 
       <div className="container">
-         <h1 style={{ marginTop: "60px", marginBottom: "30px" }}>Transiter (Travel Made Easy)</h1>
-
+        <h1 style={{ marginTop: "46px", marginBottom: "6px" }}>Transiter</h1>
+        <p style={{ textAlign: "center", marginTop: 0, marginBottom: "26px", opacity: 0.9 }}>
+          Travel made easy with clear, local transit guidance.
+        </p>
 
         <Chat />
 
         {!isAdmin ? (
           <div className="card">
-            <h2>Want to expand our knowledge base?</h2>
+            <h2>Administrator Access</h2>
+            <p style={{ marginTop: 0, marginBottom: "12px", opacity: 0.9 }}>
+              Enter your token to add official sources and keep results fresh.
+            </p>
+            <label className="field-label">Admin token</label>
             <input
               value={adminToken}
               onChange={(e) => setAdminToken(e.target.value)}
-              placeholder="For authorization, enter the admin token."
+              placeholder="Enter admin token"
             />
-            <button onClick={tryLogin}>Enter</button>
+            <button onClick={tryLogin}>Sign in</button>
           </div>
         ) : (
           <Admin token={adminToken} />
