@@ -314,7 +314,7 @@ export default function App() {
         (k === " " && e.shiftKey) ||
         k === "Home";
 
-      if (forward && pane <l 1) {
+      if (forward && panel < 1) {
         e.preventDefault();
         goTo(1);
       } else if (backward && panel > 0) {
