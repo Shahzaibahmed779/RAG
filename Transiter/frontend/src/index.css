@@ -16,9 +16,8 @@ body,
   background-color: var(--bg);
   background-image:
     radial-gradient(900px 600px at 110% -10%, rgba(15, 164, 175, 0.12), transparent 60%),
-    radial-gradient(800px 500px at -10% 120%, rgba(175, 221, 229, 0.07), transparent 60%),
-    repeating-linear-gradient(135deg, rgba(175, 221, 229, 0.03) 0, rgba(175, 221, 229, 0.03) 1px, transparent 2px, transparent 24px);
-  background-attachment: fixed, fixed, fixed;
+    radial-gradient(800px 500px at -10% 120%, rgba(175, 221, 229, 0.07), transparent 60%);
+  background-attachment: fixed, fixed;
   scroll-behavior: smooth;
 }
 
@@ -68,59 +67,75 @@ body,
   scroll-margin-top: 80px;
 }
 
-/* Original-style rotating waves (brand-only, subdued) */
+/* Original-style brand waves with visible motion */
 .wave {
   position: fixed;
-  top: -60%;
-  left: -60%;
-  width: 220%;
-  height: 220%;
-  background: radial-gradient(
-    circle at center,
-    rgba(15, 164, 175, 0.2) 0%,
-    transparent 60%
-  );
-  border-radius: 45%;
-  animation: rotateWaves 80s linear infinite;
+  top: -70vmax;
+  left: -70vmax;
+  width: 240vmax;
+  height: 240vmax;
+  background: radial-gradient(ellipse at 35% 50%, rgba(15, 164, 175, 0.22) 0%, transparent 60%);
+  border-radius: 50%;
+  animation: waveOrbitA 80s linear infinite;
   z-index: 0;
-  opacity: 0.18;
-  filter: blur(6px);
+  opacity: 0.22;
+  filter: blur(5px);
 }
 
 .wave.wave2 {
-  animation: rotateWavesReverse 120s linear infinite;
-  opacity: 0.16;
-  background: radial-gradient(
-    circle at center,
-    rgba(175, 221, 229, 0.18) 0%,
-    transparent 65%
-  );
+  animation: waveOrbitB 120s linear infinite;
+  opacity: 0.18;
+  background: radial-gradient(ellipse at 70% 55%, rgba(175, 221, 229, 0.18) 0%, transparent 65%);
 }
 
 .wave.wave3 {
-  animation: rotateWaves 160s linear infinite;
-  opacity: 0.12;
-  background: radial-gradient(
-    circle at center,
-    rgba(15, 164, 175, 0.14) 0%,
-    transparent 70%
-  );
+  animation: waveOrbitC 160s linear infinite;
+  opacity: 0.14;
+  background: radial-gradient(ellipse at 50% 25%, rgba(15, 164, 175, 0.16) 0%, transparent 70%);
 }
 
-@keyframes rotateWaves {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
+@keyframes waveOrbitA {
+  0%   { transform: translate(0%, 0%) rotate(0deg); }
+  50%  { transform: translate(5%, -3%) rotate(-180deg); }
+  100% { transform: translate(0%, 0%) rotate(-360deg); }
 }
-@keyframes rotateWavesReverse {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes waveOrbitB {
+  0%   { transform: translate(0%, 0%) rotate(0deg); }
+  50%  { transform: translate(-4%, 4%) rotate(180deg); }
+  100% { transform: translate(0%, 0%) rotate(360deg); }
+}
+@keyframes waveOrbitC {
+  0%   { transform: translate(0%, 0%) rotate(0deg); }
+  50%  { transform: translate(3%, 5%) rotate(-180deg); }
+  100% { transform: translate(0%, 0%) rotate(-360deg); }
+}
+
+/* Stage (scroll hijack panels) */
+.stage-container {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+  overscroll-behavior: contain;
+}
+
+.stage {
+  height: 200vh; /* two panels stacked */
+  width: 100%;
+  transition: transform 0.6s ease;
+  will-change: transform;
+}
+
+.panel {
+  height: 100vh;
+  display: block;
 }
 
 /* Hero */
 .hero {
   position: relative;
   z-index: 1;
-  padding: 60px 0 16px;
+  padding: 48px 0 12px;
   text-align: center;
 }
 
@@ -283,54 +298,6 @@ textarea::placeholder {
   color: var(--accent);
 }
 
-/* City wheel */
-.city-wheel {
-  position: relative;
-  height: 144px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: y mandatory;
-  padding: 0 0;
-  border: 1px solid rgba(175, 221, 229, 0.5);
-  border-radius: 10px;
-  background: rgba(175, 221, 229, 0.04);
-}
-
-.city-wheel-item {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  scroll-snap-align: center;
-  color: var(--text);
-  opacity: 0.75;
-}
-
-.city-wheel-item[aria-selected="true"] {
-  opacity: 1;
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.city-wheel-overlay {
-  pointer-events: none;
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 44px;
-  transform: translateY(-50%);
-  border-top: 1px solid rgba(175, 221, 229, 0.35);
-  border-bottom: 1px solid rgba(175, 221, 229, 0.35);
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 49, 53, 0.18),
-    transparent 30%,
-    transparent 70%,
-    rgba(0, 49, 53, 0.18)
-  );
-}
-
 /* Buttons */
 button,
 .btn {
@@ -407,6 +374,9 @@ button:disabled {
 @media (prefers-reduced-motion: reduce) {
   .wave {
     animation: none !important;
+  }
+  .stage {
+    transition: none !important;
   }
   .card:hover {
     transform: none;

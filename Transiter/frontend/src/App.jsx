@@ -1,67 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import logo from "./assets/logo.png";
 
 const API = import.meta.env.VITE_API_URL;
 
 const CITIES = ["Tokyo", "Osaka", "Kyoto"];
-const ITEM_HEIGHT = 44;
-
-function CityWheel({ value, onChange }) {
-  const containerRef = useRef(null);
-  const [active, setActive] = useState(0);
-
-  const selectedIndex = useMemo(
-    () => Math.max(0, CITIES.indexOf(value)),
-    [value]
-  );
-
-  // Keep the selected item centered when value changes
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const idx = Math.max(0, CITIES.indexOf(value));
-    const centerOffset = el.clientHeight / 2 - ITEM_HEIGHT / 2;
-    const target = Math.max(0, idx * ITEM_HEIGHT - centerOffset);
-    el.scrollTo({ top: target, behavior: "smooth" });
-    setActive(idx);
-  }, [value]);
-
-  const onScroll = (e) => {
-    const el = e.currentTarget;
-    const centerOffset = el.clientHeight / 2 - ITEM_HEIGHT / 2;
-    const idx = Math.round((el.scrollTop + centerOffset) / ITEM_HEIGHT);
-    setActive(idx);
-  };
-
-  const onWheelClick = (index) => {
-    const city = CITIES[index];
-    if (city) onChange(city);
-  };
-
-  return (
-    <div
-      ref={containerRef}
-      className="city-wheel"
-      onScroll={onScroll}
-      role="listbox"
-      aria-label="Select city"
-    >
-      {CITIES.map((c, i) => (
-        <div
-          key={c}
-          className="city-wheel-item"
-          aria-selected={i === active || i === selectedIndex}
-          role="option"
-          onClick={() => onWheelClick(i)}
-        >
-          {c}
-        </div>
-      ))}
-      <div className="city-wheel-overlay" aria-hidden="true" />
-    </div>
-  );
-}
 
 function Chat() {
   const [query, setQuery] = useState("");
@@ -88,7 +31,7 @@ function Chat() {
   };
 
   return (
-    <div className="card reveal" id="ask">
+    <div className="card" id="ask">
       <h2>Ask Transiter</h2>
       <p className="section-sub">
         Get accurate answers about tickets, passes, and routes.
@@ -114,8 +57,7 @@ function Chat() {
           </button>
         ))}
       </div>
-      <div className="field-hint">Tip: Tap a city above or scroll the wheel below.</div>
-      <CityWheel value={city} onChange={setCity} />
+      <div className="field-hint">Tip: Tap a city to select.</div>
 
       <div style={{ display: "flex", gap: 10 }}>
         <button onClick={ask} disabled={loading || !query.trim()}>
@@ -172,7 +114,7 @@ function Admin({ token }) {
   };
 
   return (
-    <div className="card reveal" id="admin">
+    <div className="card" id="admin">
       <h2>Administrator Access</h2>
       <p className="section-sub">
         Enter your token to add official sources and keep results fresh.
@@ -191,8 +133,7 @@ function Admin({ token }) {
           </button>
         ))}
       </div>
-      <div className="field-hint">Tip: Tap a city above or scroll the wheel below.</div>
-      <CityWheel value={city} onChange={setCity} />
+      <div className="field-hint">Tip: Tap a city to select.</div>
 
       <label className="field-label">URLs (space separated)</label>
       <textarea
@@ -242,7 +183,108 @@ export default function App() {
     }
   };
 
-  // Reveal-on-scroll effect for sections
+  // Scroll hijack stage between Chat (panel 0) and Admin (panel 1)
+  const stageContainerRef = useRef(null);
+  const stageRef = useRef(null);
+  const [panel, setPanel] = useState(0);
+  const isAnimatingRef = useRef(false);
+
+  const goTo = (idx) => {
+    if (idx === panel) return;
+    isAnimatingRef.current = true;
+    setPanel(idx);
+    // release after CSS transition finishes
+    setTimeout(() => {
+      isAnimatingRef.current = false;
+    }, 650);
+  };
+
+  useEffect(() => {
+    if (!stageRef.current) return;
+    stageRef.current.style.transform = `translateY(-${panel * 100}vh)`;
+  }, [panel]);
+
+  useEffect(() => {
+    const container = stageContainerRef.current;
+    if (!container) return;
+
+    const canScrollInDirection = (startEl, deltaY) => {
+      let el = startEl && startEl.nodeType === 1 ? startEl : null;
+      while (el && el !== container) {
+        if (el instanceof HTMLElement) {
+          const style = getComputedStyle(el);
+          const oy = style.overflowY;
+          const canScroll = (oy === "auto" || oy === "scroll") && el.scrollHeight > el.clientHeight;
+          if (canScroll) {
+            if (deltaY > 0) {
+              if (el.scrollTop + el.clientHeight < el.scrollHeight) return true;
+            } else if (deltaY < 0) {
+              if (el.scrollTop > 0) return true;
+            }
+          }
+        }
+        el = el.parentElement;
+      }
+      return false;
+    };
+
+    let startY = 0;
+    let latestY = 0;
+    let touchStartTarget = null;
+
+    const onWheel = (e) => {
+      if (isAnimatingRef.current) {
+        e.preventDefault();
+        return;
+      }
+      if (canScrollInDirection(e.target, e.deltaY)) {
+        return; // allow native scroll inside scrollable areas
+      }
+      e.preventDefault();
+      if (e.deltaY > 25 && panel < 1) {
+        goTo(1);
+      } else if (e.deltaY < -25 && panel > 0) {
+        goTo(0);
+      }
+    };
+
+    const onTouchStart = (e) => {
+      startY = e.touches[0].clientY;
+      latestY = startY;
+      touchStartTarget = e.target;
+    };
+    const onTouchMove = (e) => {
+      latestY = e.touches[0].clientY;
+      const deltaY = startY - latestY;
+      if (canScrollInDirection(touchStartTarget, deltaY)) {
+        return; // let content scroll
+      }
+      e.preventDefault();
+    };
+    const onTouchEnd = () => {
+      const diff = startY - latestY;
+      if (Math.abs(diff) < 30 || isAnimatingRef.current) return;
+      if (diff > 0 && panel < 1) {
+        goTo(1);
+      } else if (diff < 0 && panel > 0) {
+        goTo(0);
+      }
+    };
+
+    container.addEventListener("wheel", onWheel, { passive: false });
+    container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchmove", onTouchMove, { passive: false });
+    container.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener("wheel", onWheel);
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchmove", onTouchMove);
+      container.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [panel]);
+
+  // Reveal-on-scroll effect for non-stage sections
   useEffect(() => {
     const els = Array.from(document.querySelectorAll(".reveal"));
     if (!("IntersectionObserver" in window) || els.length === 0) {
@@ -263,6 +305,15 @@ export default function App() {
     return () => obs.disconnect();
   }, []);
 
+  const handleCTA = (target) => (e) => {
+    e.preventDefault();
+    // Scroll page to stage container, then switch panel
+    stageContainerRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      goTo(target === "admin" ? 1 : 0);
+    }, 300);
+  };
+
   return (
     <>
       <header className="app-header">
@@ -274,7 +325,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* original-style rotating wave layers */}
+      {/* moving brand waves */}
       <div className="wave"></div>
       <div className="wave wave2"></div>
       <div className="wave wave3"></div>
@@ -283,8 +334,8 @@ export default function App() {
       <section className="hero">
         <h1 className="hero-title">Transit answers, simplified.</h1>
         <div className="cta-group">
-          <a href="#ask" className="btn">Ask a question</a>
-          <a href="#admin" className="btn btn-secondary">Admin sign in</a>
+          <a href="#ask" className="btn" onClick={handleCTA("ask")}>Ask a question</a>
+          <a href="#admin" className="btn btn-secondary" onClick={handleCTA("admin")}>Admin sign in</a>
         </div>
       </section>
 
@@ -310,35 +361,49 @@ export default function App() {
             </p>
           </div>
         </div>
+      </div>
 
-        <Chat />
-
-        {!isAdmin ? (
-          <div className="card reveal" id="admin">
-            <h2>Administrator Access</h2>
-            <p className="section-sub">
-              Enter your token to add official sources and keep results fresh.
-            </p>
-            <label className="field-label">Admin token</label>
-            <input
-              value={adminToken}
-              onChange={(e) => setAdminToken(e.target.value)}
-              placeholder="Enter admin token"
-            />
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={tryLogin}>Sign in</button>
-              <button
-                className="btn-secondary"
-                onClick={() => setAdminToken("")}
-              >
-                Clear
-              </button>
+      {/* scroll-hijack stage: Chat -> Admin */}
+      <div ref={stageContainerRef} className="stage-container">
+        <div ref={stageRef} className="stage">
+          <section className="panel">
+            <div className="container">
+              <Chat />
             </div>
-          </div>
-        ) : (
-          <Admin token={adminToken} />
-        )}
+          </section>
+          <section className="panel">
+            <div className="container">
+              {!isAdmin ? (
+                <div className="card" id="admin">
+                  <h2>Administrator Access</h2>
+                  <p className="section-sub">
+                    Enter your token to add official sources and keep results fresh.
+                  </p>
+                  <label className="field-label">Admin token</label>
+                  <input
+                    value={adminToken}
+                    onChange={(e) => setAdminToken(e.target.value)}
+                    placeholder="Enter admin token"
+                  />
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button onClick={tryLogin}>Sign in</button>
+                    <button
+                      className="btn-secondary"
+                      onClick={() => setAdminToken("")}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Admin token={adminToken} />
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
 
+      <div className="container">
         <footer className="footer">
           © {new Date().getFullYear()} Transiter. All rights reserved.
         </footer>
