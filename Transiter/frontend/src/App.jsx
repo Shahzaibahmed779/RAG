@@ -29,7 +29,7 @@ function Chat() {
   };
 
   return (
-    <div className="card">
+    <div className="card" id="ask">
       <h2>Ask Transiter</h2>
       <p className="section-sub">
         Get accurate answers about tickets, passes, and routes.
@@ -105,7 +105,7 @@ function Admin({ token }) {
   };
 
   return (
-    <div className="card">
+    <div className="card" id="admin">
       <h2>Knowledge Ingestion</h2>
       <p className="section-sub">
         Add trusted URLs to improve Transiter’s city-specific guidance.
@@ -181,18 +181,53 @@ export default function App() {
         </div>
       </header>
 
+      {/* soft animated brand waves */}
+      <div className="bg-waves" aria-hidden="true">
+        <div className="wave w1"></div>
+        <div className="wave w2"></div>
+        <div className="wave w3"></div>
+      </div>
+
+      {/* hero */}
+      <section className="hero">
+        <h1 className="hero-title">Transit answers, simplified.</h1>
+        <p className="hero-lead">
+          Smart, city‑aware guidance for tickets, passes, and routes—built to be fast,
+          accurate, and easy on the eyes.
+        </p>
+        <div className="cta-group">
+          <a href="#ask" className="btn">Ask a question</a>
+          <a href="#admin" className="btn btn-secondary">Admin sign in</a>
+        </div>
+      </section>
+
       <div className="container">
-        <div className="card">
-          <h1>Welcome</h1>
-          <p className="section-sub">
-            Clear, local transit guidance for busy professionals and everyday riders.
-          </p>
+        {/* value props */}
+        <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12 }}>
+          <div>
+            <h2 style={{ marginBottom: 6 }}>Reliable</h2>
+            <p className="section-sub" style={{ margin: 0 }}>
+              Answers sourced from official providers.
+            </p>
+          </div>
+          <div>
+            <h2 style={{ marginBottom: 6 }}>Localized</h2>
+            <p className="section-sub" style={{ margin: 0 }}>
+              Tailored to the city you select.
+            </p>
+          </div>
+          <div>
+            <h2 style={{ marginBottom: 6 }}>Up‑to‑date</h2>
+            <p className="section-sub" style={{ margin: 0 }}>
+              Continuously refreshed knowledge base.
+            </p>
+          </div>
         </div>
 
         <Chat />
 
         {!isAdmin ? (
-          <div className="card">
+          <div className="card" id="admin">
             <h2>Administrator Access</h2>
             <p className="section-sub">
               Enter your token to add official sources and keep results fresh.
