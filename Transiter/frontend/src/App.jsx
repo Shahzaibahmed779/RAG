@@ -1,8 +1,57 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import logo from "./assets/logo.png";
 
 const API = import.meta.env.VITE_API_URL;
+
+const CITIES = ["Tokyo", "Osaka", "Kyoto"];
+const ITEM_HEIGHT = 44;
+const VISIBLE_COUNT = 3;
+
+function CityWheel({ value, onChange }) {
+  const [scrollTop, setScrollTop] = useState(0);
+  const selectedIndex = useMemo(
+    () => Math.max(0, CITIES.indexOf(value)),
+    [value]
+  );
+
+  const onScroll = (e) => {
+    const t = e.currentTarget.scrollTop;
+    setScrollTop(t);
+  };
+
+  const onWheelClick = (index) => {
+    const city = CITIES[index];
+    if (city) onChange(city);
+  };
+
+  // Compute aria-selected based on scroll position
+  const active = Math.round(scrollTop / ITEM_HEIGHT);
+
+  return (
+    <div
+      className="city-wheel"
+      onScroll={onScroll}
+      style={{
+        paddingTop: (VISIBLE_COUNT - 1) / 2 * ITEM_HEIGHT,
+        paddingBottom: (VISIBLE_COUNT - 1) / 2 * ITEM_HEIGHT,
+      }}
+    >
+      {CITIES.map((c, i) => (
+        <div
+          key={c}
+          className="city-wheel-item"
+          aria-selected={i === active || i === selectedIndex}
+          role="option"
+          onClick={() => onWheelClick(i)}
+        >
+          {c}
+        </div>
+      ))}
+      <div className="city-wheel-overlay" aria-hidden="true" />
+    </div>
+  );
+}
 
 function Chat() {
   const [query, setQuery] = useState("");
@@ -43,14 +92,7 @@ function Chat() {
       />
 
       <label className="field-label">City</label>
-      <select
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-      >
-        <option value="Tokyo">Tokyo</option>
-        <option value="Osaka">Osaka</option>
-        <option value="Kyoto">Kyoto</option>
-      </select>
+      <CityWheel value={city} onChange={setCity} />
 
       <div style={{ display: "flex", gap: 10 }}>
         <button onClick={ask} disabled={loading || !query.trim()}>
@@ -67,7 +109,9 @@ function Chat() {
         </button>
       </div>
 
-      <div style={{ marginTop: 16, whiteSpace: "pre-wrap", maxHeight: "320px", overflowY: "auto" }} className="markdown">
+      <div className="card-divider" />
+
+      <div style={{ marginTop: 6, whiteSpace: "pre-wrap", maxHeight: "340px", overflowY: "auto" }} className="markdown">
         <ReactMarkdown>{answer}</ReactMarkdown>
       </div>
     </div>
@@ -112,14 +156,7 @@ function Admin({ token }) {
       </p>
 
       <label className="field-label">City</label>
-      <select
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-      >
-        <option value="Tokyo">Tokyo</option>
-        <option value="Osaka">Osaka</option>
-        <option value="Kyoto">Kyoto</option>
-      </select>
+      <CityWheel value={city} onChange={setCity} />
 
       <label className="field-label">URLs (space separated)</label>
       <textarea
@@ -169,6 +206,10 @@ export default function App() {
     }
   };
 
+  // Simple active nav highlighting based on hash
+  const [hash, setHash] = useState(window.location.hash);
+  window.onhashchange = () => setHash(window.location.hash);
+
   return (
     <>
       <header className="app-header">
@@ -177,6 +218,10 @@ export default function App() {
             <img src={logo} alt="Transiter logo" />
             <div className="brand-name">Transiter</div>
           </div>
+          <nav className="app-nav" aria-label="Primary">
+            <a href="#ask" className={`nav-link ${hash === "#ask" ? "active" : ""}`}>Ask</a>
+            <a href="#admin" className={`nav-link ${hash === "#admin" ? "active" : ""}`}>Admin</a>
+          </nav>
           <div className="header-sub">Travel made easy</div>
         </div>
       </header>
